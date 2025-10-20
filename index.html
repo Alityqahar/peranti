@@ -1,0 +1,3705 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PERANTI - Pengaduan Infrastruktur Rakyat Via Peta Teknologi Terintegrasi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3652cc;
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #3b82f6;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --surface-primary: #ffffff;
+            --surface-secondary: #f9fafb;
+            --border-color: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Enhanced Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-align: center;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin: 0;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 8px;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .nav-tab {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 10px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            font-size: 0.9rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .nav-tab span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-tab:hover::before,
+        .nav-tab.active::before {
+            opacity: 1;
+        }
+
+        .nav-tab:hover,
+        .nav-tab.active {
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-tab.hidden {
+            display: none;
+        }
+
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 12px 16px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 0.85rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .logout-btn {
+            background: var(--danger-color);
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+            transform: scale(1.05);
+        }
+
+        /* Enhanced Main Container */
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--surface-primary);
+            margin: 10px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .content-section {
+            display: none;
+            flex: 1;
+            position: relative;
+        }
+
+        .content-section.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Enhanced Map Section */
+        .map-section {
+            flex: 1;
+            position: relative;
+            min-height: 70vh;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            min-height: 70vh;
+            border-radius: 0 0 20px 20px;
+        }
+
+        /* Enhanced Controls */
+        .floating-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 200px;
+        }
+
+        .control-btn {
+            background: var(--surface-primary);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-md);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .control-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .control-btn:hover::before {
+            left: 100%;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+
+        .control-btn.primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+        }
+
+        .control-btn.success {
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            color: white;
+            border: none;
+        }
+
+        .control-btn.danger {
+            background: linear-gradient(135deg, var(--danger-color), #dc2626);
+            color: white;
+            border: none;
+        }
+
+        /* Enhanced Search Controls */
+        .search-controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 320px;
+        }
+
+        .search-input,
+        .filter-select {
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--surface-primary);
+            backdrop-filter: blur(15px);
+            box-shadow: var(--shadow-md);
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            color: var(--text-primary);
+        }
+
+        .search-input:focus,
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        /* Enhanced Form Modal */
+        .form-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .form-modal.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .form-container {
+            background: var(--surface-primary);
+            border-radius: 24px;
+            padding: 32px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-xl);
+            transform: translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--border-color);
+        }
+
+        .form-modal.show .form-container {
+            transform: translateY(0);
+        }
+
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .form-title {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .close-btn {
+            background: var(--surface-secondary);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .close-btn:hover {
+            background: var(--danger-color);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* Enhanced Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            background: var(--surface-primary);
+            color: var(--text-primary);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* Enhanced Photo Upload */
+        .photo-upload {
+            position: relative;
+            border: 2px dashed var(--primary-color);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.03), rgba(118, 75, 162, 0.03));
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .photo-upload:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+            border-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .photo-upload input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+        }
+
+        .photo-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 12px;
+            margin: 12px auto;
+            display: none;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .remove-photo {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-top: 12px;
+            display: none;
+            transition: all 0.3s ease;
+        }
+
+        .remove-photo:hover {
+            background: #dc2626;
+            transform: scale(1.05);
+        }
+
+        /* Enhanced Priority Selection */
+        .priority-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+        }
+
+        .priority-option {
+            position: relative;
+        }
+
+        .priority-option input[type="radio"] {
+            display: none;
+        }
+
+        .priority-option label {
+            display: block;
+            padding: 16px 12px;
+            text-align: center;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.85rem;
+            background: var(--surface-primary);
+        }
+
+        .priority-option input[type="radio"]:checked + label {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-color: var(--primary-color);
+            transform: scale(1.05);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Enhanced Submit Button */
+        .submit-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Enhanced Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-terkirim { background: var(--info-color); color: white; }
+        .status-diproses { background: var(--warning-color); color: white; }
+        .status-selesai { background: var(--success-color); color: white; }
+        .status-ditolak { background: var(--danger-color); color: white; }
+
+        .priority-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .priority-tinggi { background: var(--danger-color); color: white; }
+        .priority-sedang { background: var(--warning-color); color: white; }
+        .priority-rendah { background: var(--success-color); color: white; }
+
+        /* Enhanced Dashboard */
+        .admin-panel {
+            padding: 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--surface-primary);
+            padding: 28px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-top: 8px;
+            font-size: 0.95rem;
+        }
+
+        /* Enhanced Reports Table */
+        .reports-table {
+            background: var(--surface-primary);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 24px 32px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .report-item {
+            padding: 24px 32px;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .report-item:hover {
+            background: var(--surface-secondary);
+        }
+
+        .report-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Enhanced Notifications */
+        .notification {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 500;
+            z-index: 9999;
+            max-width: 400px;
+            font-size: 0.9rem;
+            box-shadow: var(--shadow-xl);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .notification.success { background: linear-gradient(135deg, var(--success-color), #059669); }
+        .notification.error { background: linear-gradient(135deg, var(--danger-color), #dc2626); }
+        .notification.info { background: linear-gradient(135deg, var(--info-color), #2563eb); }
+        .notification.warning { background: linear-gradient(135deg, var(--warning-color), #d97706); }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Enhanced Loading Spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Enhanced Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 16px;
+            }
+            
+            .header h1 {
+                font-size: 1.6rem;
+            }
+            
+            .floating-controls,
+            .search-controls {
+                position: relative;
+                max-width: none;
+                margin: 16px;
+            }
+            
+            .main-container {
+                margin: 8px;
+                border-radius: 16px;
+            }
+            
+            .form-container {
+                margin: 16px;
+                padding: 24px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .priority-group {
+                grid-template-columns: 1fr;
+            }
+
+            .user-info {
+                position: relative;
+                margin-top: 16px;
+                text-align: center;
+            }
+        }
+
+        /* Enhanced Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--surface-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5a6fd8, #6a4190);
+        }
+
+        /* Custom marker styles */
+        .custom-marker {
+            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.3));
+        }
+
+        /* Enhanced popup styles */
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border-color);
+        }
+
+        .leaflet-popup-tip {
+            box-shadow: var(--shadow-md);
+        }
+
+        .popup-content {
+            padding: 8px 0;
+        }
+
+        .popup-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .popup-meta {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .popup-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            margin: 4px 4px 0 0;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .popup-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-1px);
+        }
+
+        .popup-photo {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin: 8px 0;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: transform 0.3s ease;
+        }
+
+        .popup-photo:hover {
+            transform: scale(1.05);
+        }
+        /* Enhanced Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .loading-screen.hide {
+            opacity: 0;
+            transform: scale(1.1);
+            pointer-events: none;
+        }
+
+        .loading-logo {
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            animation: logoFloat 3s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading-logo::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: rotate 4s linear infinite;
+        }
+
+        .logo-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            margin-bottom: 4px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo-text {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0px) rotateY(0deg); }
+            33% { transform: translateY(-8px) rotateY(-5deg); }
+            66% { transform: translateY(-4px) rotateY(5deg); }
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+      
+.loading-logo img {
+  width: 120px;       
+  height: auto;
+  border-radius: 16px;
+  display: block;
+  margin: 0 auto;
+  transform: translateX(3px); 
+}
+
+
+.logo-icon img {
+  width: 100px;
+  height: auto;
+  border-radius: 12px;
+  display: block;
+  margin: 0 auto;
+  margin-left: -40px
+;
+}
+
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+
+        .loading-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .loading-subtitle {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 40px;
+            text-align: center;
+            max-width: 400px;
+            line-height: 1.5;
+        }
+
+        .loading-progress {
+            width: 300px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .loading-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 1));
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.3s ease;
+            position: relative;
+        }
+
+        .loading-progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(300%); }
+        }
+
+        .loading-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+            min-height: 24px;
+        }
+
+        .loading-dots {
+            display: inline-flex;
+            gap: 4px;
+            margin-left: 4px;
+        }
+
+        .loading-dot {
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: dotPulse 1.5s infinite;
+        }
+
+        .loading-dot:nth-child(2) { animation-delay: 0.3s; }
+        .loading-dot:nth-child(3) { animation-delay: 0.6s; }
+
+        @keyframes dotPulse {
+            0%, 60%, 100% { opacity: 0.3; transform: scale(0.8); }
+            30% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Loading screen responsive */
+        @media (max-width: 768px) {
+            .loading-logo {
+                width: 100px;
+                height: 100px;
+                font-size: 2.5rem;
+                margin-bottom: 20px;
+            }
+
+            .loading-title {
+                font-size: 2rem;
+            }
+
+            .loading-subtitle {
+                font-size: 0.9rem;
+                padding: 0 20px;
+            }
+
+            .loading-progress {
+                width: 250px;
+            }
+        }
+     @import url('https://fonts.cdnfonts.com/css/rustic-roadway');
+
+.maskot-container {
+  position: fixed;
+  bottom: 10px;
+  right: 25px;
+  width: 120px;
+  height: 160px;
+  z-index: 1500;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  cursor: pointer;
+}
+
+.maskot-img {
+  width: 110px;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+  transition: opacity 0.3s ease;
+}
+
+.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Gelembung ucapan */
+.maskot-bubble {
+  position: absolute;
+  bottom: 130px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  background: linear-gradient(145deg, #ffffff, #f3f6ff);
+  color: #333;
+  border-radius: 40px;
+  padding: 14px 20px;
+  font-family: 'Rustic Roadway', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  opacity: 0;
+  transform-origin: bottom center;
+  transition: all 0.4s cubic-bezier(0.25, 1.5, 0.5, 1);
+  max-width: 240px;
+  text-align: center;
+}
+
+/* Ekor gelembung */
+.maskot-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 12px solid #ffffff;
+}
+
+/* Aktif */
+.maskot-bubble.show {
+  transform: translateX(-50%) scale(1);
+  opacity: 1;
+}
+
+/* Efek pecah mewah */
+@keyframes popBurst {
+  0% { transform: translateX(-50%) scale(1); opacity: 1; }
+  40% { transform: translateX(-50%) scale(1.3); opacity: 0.9; }
+  100% { transform: translateX(-50%) scale(0); opacity: 0; }
+}
+.maskot-bubble.pop {
+  animation: popBurst 0.5s ease-out forwards;
+}
+
+/* Getaran lembut */
+@keyframes shake {
+  0%, 100% { transform: translateX(-50%) translate(0,0); }
+  25% { transform: translateX(-50%) translate(-2px,1px); }
+  50% { transform: translateX(-50%) translate(2px,-1px); }
+  75% { transform: translateX(-50%) translate(-1px,-1px); }
+}
+.shake { animation: shake 0.4s ease; }
+
+/* Partikel bercahaya */
+.burst-particles {
+  position: absolute;
+  bottom: 135px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle, rgba(255,255,255,1), rgba(255,255,255,0));
+  border-radius: 50%;
+  opacity: 0;
+  animation: particleFly 1s ease-out forwards;
+  box-shadow: 0 0 8px 2px rgba(255,255,200,0.8);
+}
+@keyframes particleFly {
+  0% { transform: scale(0.6) translate(0,0); opacity: 1; }
+  100% {
+    transform: scale(1) translate(
+      calc(var(--x) * 1px),
+      calc(var(--y) * 1px)
+    );
+    opacity: 0;
+  }
+}
+
+/* Aura lingkaran mewah */
+.aura-ring {
+  position: absolute;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.7) 0%, rgba(255,230,180,0.3) 40%, transparent 80%);
+  opacity: 0;
+  pointer-events: none;
+}
+.aura-ring.active {
+  animation: auraPulse 0.8s ease-out forwards;
+}
+@keyframes auraPulse {
+  0% { opacity: 0.8; transform: translateX(-50%) scale(0.5); }
+  100% { opacity: 0; transform: translateX(-50%) scale(1.8); }
+}
+
+/* Flash lembut */
+.flash-effect {
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 160px;
+  height: 160px;
+  background: radial-gradient(circle, rgba(255,255,240,0.9), transparent 70%);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+.flash-effect.active {
+  animation: flashFade 0.6s ease-out forwards;
+}
+@keyframes flashFade {
+  0% { opacity: 0.9; transform: translateX(-50%) scale(0.8); }
+  100% { opacity: 0; transform: translateX(-50%) scale(1.6); }
+}
+/* Partikel cahaya mewah */
+.particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle, rgba(255,255,255,1), rgba(255,255,255,0));
+  border-radius: 50%;
+  opacity: 0;
+  mix-blend-mode: screen;
+  animation: particleFly 1.8s cubic-bezier(0.25, 1, 0.5, 1) forwards; /* durasi lebih lama */
+  box-shadow: 0 0 10px 2px rgba(255,255,200,0.8);
+}
+
+/* Partikel terbang melambat dan jatuh lembut */
+@keyframes particleFly {
+  0% {
+    transform: scale(0.6) translate(0, 0);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(1) translate(calc(var(--x) * 1px), calc(var(--y) * 1px));
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.8) translate(calc(var(--x) * 1px), calc(var(--y) * 1px + 40px)); /* efek jatuh lembut */
+    opacity: 0;
+  }
+}
+
+/* Aura & flash juga diperpanjang sedikit */
+.aura-ring.active {
+  animation: auraPulse 1.5s ease-out forwards;
+}
+.flash-effect.active {
+  animation: flashFade 1.2s ease-out forwards;
+}
+
+
+
+    </style>
+</head>
+<body>
+<!-- Enhanced Loading Screen -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo">
+    <img src="images/logo peranti.jpg" alt="Logo PERANTI" />
+  </div>
+  <div class="loading-title">PERANTI</div>
+  <div class="loading-subtitle">
+    Pengaduan Infrastruktur Rakyat Via Peta Teknologi Terintegrasi
+  </div>
+  <div class="loading-progress">
+    <div class="loading-progress-bar" id="loadingProgressBar"></div>
+  </div>
+  <div class="loading-text" id="loadingText">
+    Memuat website<span class="loading-dots">
+      <span class="loading-dot"></span>
+      <span class="loading-dot"></span>
+      <span class="loading-dot"></span>
+    </span>
+  </div>
+</div>
+
+<!-- Header Section -->
+<div class="header">
+  <div class="header-content">
+    <div class="logo-section">
+      <div class="logo-icon">
+        <img src="images/logo peranti.jpg" alt="Logo PERANTI" />
+      </div>
+      <div>
+        <h1>PERANTI</h1>
+        <p>Pengaduan Infrastruktur Rakyat Via Peta Teknologi Terintegrasi</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+            
+            <div class="user-info" id="userInfo">
+                <!-- User info will be displayed here when logged in -->
+            </div>
+            
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="map">
+                    <span>🗺️ Peta Laporan</span>
+                </button>
+                <button class="nav-tab hidden" data-tab="dashboard" id="dashboardTab">
+                    <span>📊 Dashboard Admin</span>
+                </button>
+                <button class="nav-tab" data-tab="login" id="loginTab">
+                    <span>🔐 Login</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- Map Section -->
+        <div id="mapSection" class="content-section active">
+            <!-- Search Controls -->
+            <div class="search-controls">
+                <input type="text" class="search-input" id="searchInput" placeholder="🔍 Cari laporan..." />
+                <select class="filter-select" id="priorityFilter">
+                    <option value="all">Semua Prioritas</option>
+                    <option value="tinggi">🔴 Prioritas Tinggi</option>
+                    <option value="sedang">🟡 Prioritas Sedang</option>
+                    <option value="rendah">🟢 Prioritas Rendah</option>
+                </select>
+                <select class="filter-select" id="categoryFilter">
+                    <option value="all">Semua Kategori</option>
+                    <option value="infrastruktur">🏗️ Infrastruktur</option>
+                    <option value="kebersihan">🧹 Kebersihan</option>
+                    <option value="lainnya">📋 Lainnya</option>
+                </select>
+                <select class="filter-select" id="statusFilter">
+                    <option value="all">Semua Status</option>
+                    <option value="terkirim">📤 Terkirim</option>
+                    <option value="diproses">⚙️ Diproses</option>
+                    <option value="selesai">✅ Selesai</option>
+                    <option value="ditolak">❌ Ditolak</option>
+                </select>
+            </div>
+
+            <!-- Admin Province Controls -->
+            <div class="admin-controls hidden" id="adminControls" style="position: absolute; bottom: 20px; left: 20px; z-index: 1000; max-width: 320px;">
+                <select class="filter-select" id="provinceFilter" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: rgb(0, 0, 0); font-weight: 600;">
+                    <option value="all">🏛️ Seluruh Indonesia</option>
+                    <option value="aceh">🏛️ Aceh</option>
+                    <option value="sumatera utara">🏛️ Sumatera Utara</option>
+                    <option value="sumatera barat">🏛️ Sumatera Barat</option>
+                    <option value="riau">🏛️ Riau</option>
+                    <option value="jambi">🏛️ Jambi</option>
+                    <option value="sumatera selatan">🏛️ Sumatera Selatan</option>
+                    <option value="bengkulu">🏛️ Bengkulu</option>
+                    <option value="lampung">🏛️ Lampung</option>
+                    <option value="kepulauan bangka belitung">🏛️ Kepulauan Bangka Belitung</option>
+                    <option value="kepulauan riau">🏛️ Kepulauan Riau</option>
+                    <option value="dki jakarta">🏛️ DKI Jakarta</option>
+                    <option value="jawa barat">🏛️ Jawa Barat</option>
+                    <option value="jawa tengah">🏛️ Jawa Tengah</option>
+                    <option value="di yogyakarta">🏛️ DI Yogyakarta</option>
+                    <option value="jawa timur">🏛️ Jawa Timur</option>
+                    <option value="banten">🏛️ Banten</option>
+                    <option value="bali">🏛️ Bali</option>
+                    <option value="nusa tenggara barat">🏛️ Nusa Tenggara Barat</option>
+                    <option value="nusa tenggara timur">🏛️ Nusa Tenggara Timur</option>
+                    <option value="kalimantan barat">🏛️ Kalimantan Barat</option>
+                    <option value="kalimantan tengah">🏛️ Kalimantan Tengah</option>
+                    <option value="kalimantan selatan">🏛️ Kalimantan Selatan</option>
+                    <option value="kalimantan timur">🏛️ Kalimantan Timur</option>
+                    <option value="kalimantan utara">🏛️ Kalimantan Utara</option>
+                    <option value="sulawesi utara">🏛️ Sulawesi Utara</option>
+                    <option value="sulawesi tengah">🏛️ Sulawesi Tengah</option>
+                    <option value="sulawesi selatan">🏛️ Sulawesi Selatan</option>
+                    <option value="sulawesi tenggara">🏛️ Sulawesi Tenggara</option>
+                    <option value="gorontalo">🏛️ Gorontalo</option>
+                    <option value="sulawesi barat">🏛️ Sulawesi Barat</option>
+                    <option value="maluku">🏛️ Maluku</option>
+                    <option value="maluku utara">🏛️ Maluku Utara</option>
+                    <option value="papua barat">🏛️ Papua Barat</option>
+                    <option value="papua">🏛️ Papua</option>
+                    <option value="papua selatan">🏛️ Papua Selatan</option>
+                    <option value="papua tengah">🏛️ Papua Tengah</option>
+                    <option value="papua pegunungan">🏛️ Papua Pegunungan</option>
+                    <option value="papua barat daya">🏛️ Papua Barat Daya</option>
+                </select>
+            </div>
+
+            <!-- Floating Controls -->
+            <div class="floating-controls">
+                <button class="control-btn primary" id="addReportBtn">
+                    <span>📝</span> Buat Laporan
+                </button>
+                <button class="control-btn success" id="myLocationBtn">
+                    <span>📍</span> Lokasi Saya
+                </button>
+                <button class="control-btn" id="refreshMapBtn">
+                    <span>🔄</span> Refresh Peta
+                </button>
+                <button class="control-btn danger hidden" id="clearDataBtn">
+                    <span>🗑️</span> Hapus Data
+                </button>
+            </div>
+
+            <div class="map-section">
+                <div id="map"></div>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" class="content-section">
+            <div class="admin-panel" id="dashboardPanel">
+                <!-- Dashboard content will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Login Section -->
+        <div id="loginSection" class="content-section">
+            <div class="login-container" style="display: flex; justify-content: center; align-items: center; min-height: 60vh; padding: 32px;">
+                <div class="login-form" style="background: var(--surface-primary); padding: 40px; border-radius: 24px; box-shadow: var(--shadow-xl); width: 100%; max-width: 480px; border: 1px solid var(--border-color);">
+                    <h2 style="text-align: center; color: var(--text-primary); margin-bottom: 32px; font-size: 1.8rem; font-weight: 700;">🔐 Login Sistem</h2>
+                    
+                    <div style="background: var(--surface-secondary); padding: 20px; border-radius: 16px; margin-bottom: 24px; font-size: 0.85rem; border: 1px solid var(--border-color);">
+                        <h4 style="margin-bottom: 16px; color: var(--text-primary); font-weight: 600;">🔑 Akun Demo:</h4>
+                        <div style="display: grid; gap: 8px;">
+                            <div style="padding: 8px 0; border-bottom: 1px solid var(--border-color);"><strong>Super Admin:</strong> admin / admin123</div>
+                            <div style="padding: 8px 0; border-bottom: 1px solid var(--border-color);"><strong>Infrastruktur:</strong> infrastruktur / infra123</div>
+                            <div style="padding: 8px 0; border-bottom: 1px solid var(--border-color);"><strong>Kebakaran:</strong> kebakaran / kebakaran123</div>
+                            <div style="padding: 8px 0; border-bottom: 1px solid var(--border-color);"><strong>Keamanan:</strong> keamanan / keamanan123</div>
+                            <div style="padding: 8px 0; border-bottom: 1px solid var(--border-color);"><strong>Bencana Alam:</strong> bencana / bencana123</div>
+                            <div style="padding: 8px 0; border-bottom: 1px solid var(--border-color);"><strong>Transportasi:</strong> transport / transport123</div>
+                            <div style="padding: 8px 0;"><strong>Kebersihan:</strong> kebersihan / kebersihan123</div>
+                        </div>
+                    </div>
+                    
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" name="username" required placeholder="Masukkan username">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" required placeholder="Masukkan password">
+                        </div>
+                        <button type="submit" class="submit-btn">🚪 LOGIN SEKARANG</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Form Modal -->
+    <div class="form-modal" id="formModal">
+        <div class="form-container">
+            <div class="form-header">
+                <h2 class="form-title">📝 Buat Laporan Baru</h2>
+                <button class="close-btn" id="closeFormBtn">×</button>
+            </div>
+            
+            <div class="success-message" id="successMessage" style="background: linear-gradient(135deg, var(--success-color), #059669); color: white; padding: 16px; border-radius: 12px; margin-bottom: 20px; display: none; box-shadow: var(--shadow-md);">
+                ✅ Laporan berhasil dikirim! Terima kasih atas kontribusi Anda.
+            </div>
+
+            <form id="reportForm">
+                <div class="form-group">
+                    <label for="nama">👤 Nama Lengkap *</label>
+                    <input type="text" id="nama" name="nama" required placeholder="Masukkan nama lengkap Anda">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">📧 Email *</label>
+                    <input type="email" id="email" name="email" required placeholder="contoh@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="telepon">📱 Nomor Telepon *</label>
+                    <input type="tel" id="telepon" name="telepon" required placeholder="08123456789">
+                </div>
+
+                <div class="form-group">
+                    <label for="judulMasalah">📋 Judul Masalah *</label>
+                    <input type="text" id="judulMasalah" name="judulMasalah" required placeholder="Deskripsi singkat masalah">
+                </div>
+
+                <div class="form-group">
+                    <label for="kategori">📂 Kategori Masalah *</label>
+                    <select id="kategori" name="kategori" required>
+                        <option value="">Pilih kategori</option>
+                        <option value="infrastruktur">🏗️ Infrastruktur</option>
+                        <option value="kebakaran">🔥 Kebakaran</option>
+                        <option value="keamanan">🚨 Keamanan</option>
+                        <option value="bencana alam">🌳 Bencana Alam</option>
+                        <option value="transportasi">🚌 Transportasi</option>
+                        <option value="kebersihan">🧹 Kebersihan</option>
+                        <option value="lainnya">📋 Lainnya</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="provinsi">🏛️ Provinsi *</label>
+                    <select id="provinsi" name="provinsi" required>
+                        <option value="">Pilih provinsi</option>
+                        <option value="aceh">Aceh</option>
+                        <option value="sumatera utara">Sumatera Utara</option>
+                        <option value="sumatera barat">Sumatera Barat</option>
+                        <option value="riau">Riau</option>
+                        <option value="jambi">Jambi</option>
+                        <option value="sumatera selatan">Sumatera Selatan</option>
+                        <option value="bengkulu">Bengkulu</option>
+                        <option value="lampung">Lampung</option>
+                        <option value="kepulauan bangka belitung">Kepulauan Bangka Belitung</option>
+                        <option value="kepulauan riau">Kepulauan Riau</option>
+                        <option value="dki jakarta">DKI Jakarta</option>
+                        <option value="jawa barat">Jawa Barat</option>
+                        <option value="jawa tengah">Jawa Tengah</option>
+                        <option value="di yogyakarta">DI Yogyakarta</option>
+                        <option value="jawa timur">Jawa Timur</option>
+                        <option value="banten">Banten</option>
+                        <option value="bali">Bali</option>
+                        <option value="nusa tenggara barat">Nusa Tenggara Barat</option>
+                        <option value="nusa tenggara timur">Nusa Tenggara Timur</option>
+                        <option value="kalimantan barat">Kalimantan Barat</option>
+                        <option value="kalimantan tengah">Kalimantan Tengah</option>
+                        <option value="kalimantan selatan">Kalimantan Selatan</option>
+                        <option value="kalimantan timur">Kalimantan Timur</option>
+                        <option value="kalimantan utara">Kalimantan Utara</option>
+                        <option value="sulawesi utara">Sulawesi Utara</option>
+                        <option value="sulawesi tengah">Sulawesi Tengah</option>
+                        <option value="sulawesi selatan">Sulawesi Selatan</option>
+                        <option value="sulawesi tenggara">Sulawesi Tenggara</option>
+                        <option value="gorontalo">Gorontalo</option>
+                        <option value="sulawesi barat">Sulawesi Barat</option>
+                        <option value="maluku">Maluku</option>
+                        <option value="maluku utara">Maluku Utara</option>
+                        <option value="papua barat">Papua Barat</option>
+                        <option value="papua">Papua</option>
+                        <option value="papua selatan">Papua Selatan</option>
+                        <option value="papua tengah">Papua Tengah</option>
+                        <option value="papua pegunungan">Papua Pegunungan</option>
+                        <option value="papua barat daya">Papua Barat Daya</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="deskripsi">📝 Deskripsi Detail Masalah *</label>
+                    <textarea id="deskripsi" name="deskripsi" required placeholder="Jelaskan masalah secara detail..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="foto">📷 Foto Bukti Masalah *</label>
+                    <div class="photo-upload" id="photoUpload">
+                        <input type="file" id="foto" name="foto" accept="image/*" required>
+                        <div class="photo-upload-content">
+                            <div style="font-size: 3rem; margin-bottom: 12px;">📷</div>
+                            <div style="font-weight: 600; margin-bottom: 8px; font-size: 1rem;">Klik untuk mengunggah foto</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">Format: JPG, PNG, WebP (Maksimal 5MB)</div>
+                        </div>
+                        <img class="photo-preview" id="photoPreview" alt="Preview">
+                        <button type="button" class="remove-photo" id="removePhoto">🗑️ Hapus Foto</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>⚡ Tingkat Prioritas *</label>
+                    <div class="priority-group">
+                        <div class="priority-option">
+                            <input type="radio" id="rendah" name="prioritas" value="rendah" required>
+                            <label for="rendah">🟢 Rendah</label>
+                        </div>
+                        <div class="priority-option">
+                            <input type="radio" id="sedang" name="prioritas" value="sedang" required>
+                            <label for="sedang">🟡 Sedang</label>
+                        </div>
+                        <div class="priority-option">
+                            <input type="radio" id="tinggi" name="prioritas" value="tinggi" required>
+                            <label for="tinggi">🔴 Tinggi</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="lokasi">📍 Lokasi Spesifik *</label>
+                    <input type="text" id="lokasi" name="lokasi" required placeholder="Klik peta untuk menentukan lokasi atau gunakan GPS">
+                    <button type="button" style="background: var(--success-color); color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; margin-top: 8px; font-weight: 500; transition: all 0.3s ease;" id="getCurrentLocation" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='var(--success-color)'">
+                        📍 Gunakan GPS Saya
+                    </button>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <span id="submitBtnText">🚀 KIRIM LAPORAN</span>
+                    <span id="submitBtnLoading" style="display: none;"><span class="loading-spinner"></span> Mengirim...</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Photo Modal -->
+    <div class="form-modal" id="photoModal" style="backdrop-filter: blur(12px); background: rgba(0, 0, 0, 0.8);">
+        <div style="position: relative; max-width: 90vw; max-height: 90vh;">
+            <button style="position: absolute; top: -40px; right: -40px; background: rgba(255,255,255,0.2); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px); z-index: 1;" id="photoModalClose">×</button>
+            <img id="photoModalImg" alt="Full Photo" style="max-width: 100%; max-height: 100%; border-radius: 12px; box-shadow: var(--shadow-xl);">
+        </div>
+    </div>
+<!-- Maskot PERANTI -->
+<div class="maskot-container" id="maskotPeranti">
+  <img src="images/maskot_peranti-removebg-preview.png" alt="Maskot PERANTI" class="maskot-img" id="maskotNormal" />
+  <img src="images/maskot_peranti_marah-removebg-preview.png" alt="Maskot Kaget" class="maskot-img hidden" id="maskotShocked" />
+
+  <div class="maskot-bubble" id="maskotBubble">Halo! Ada yang bisa saya bantu?</div>
+
+  <!-- Suara -->
+  <audio id="popSound" preload="auto">
+    <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_9a1ef450a0.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="burstSound" preload="auto">
+    <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_11f4d227f3.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="sparkSound" preload="auto">
+    <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_9e1e7344ef.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Efek -->
+  <div class="burst-particles" id="burstParticles"></div>
+  <div class="flash-effect" id="flashEffect"></div>
+  <div class="aura-ring" id="auraRing"></div>
+</div>
+
+
+
+
+
+    <!-- Status Change Modal -->
+    <div class="form-modal" id="statusModal">
+        <div class="form-container" style="max-width: 450px;">
+            <div class="form-header">
+                <h2 class="form-title">📊 Ubah Status Laporan</h2>
+                <button class="close-btn" id="closeStatusBtn">×</button>
+            </div>
+            
+            <form id="statusForm">
+                <div class="form-group">
+                    <label for="newStatus">Status Baru</label>
+                    <select id="newStatus" required>
+                        <option value="">Pilih status baru</option>
+                        <option value="terkirim">📤 Terkirim</option>
+                        <option value="diproses">⚙️ Diproses</option>
+                        <option value="selesai">✅ Selesai</option>
+                        <option value="ditolak">❌ Ditolak</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="statusNote">📝 Catatan (Opsional)</label>
+                    <textarea id="statusNote" placeholder="Tambahkan catatan tentang perubahan status..." style="min-height: 80px;"></textarea>
+                </div>
+                <button type="submit" class="submit-btn">💾 SIMPAN PERUBAHAN</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script>
+        // Enhanced PERANTI Application with Loading Screen
+        class PERANTI {
+            constructor() {
+                // Initialize loading screen first
+                this.initLoadingScreen();
+                
+                // Initialize data with persistent storage
+                this.reports = this.loadReports();
+                this.reportIdCounter = this.getNextReportId();
+                this.selectedLocation = null;
+                this.selectedPhoto = null;
+                this.map = null;
+                this.markers = [];
+                this.currentUser = this.loadCurrentUser();
+                this.currentPage = 1;
+                this.reportsPerPage = 10;
+                
+                // Enhanced user accounts
+                this.userAccounts = {
+                    'admin': { 
+                        passwordHash: this.hashPassword('admin123'), 
+                        role: 'admin', 
+                        categories: ['all'], 
+                        displayName: 'Super Admin',
+                        badge: 'admin'
+                    },
+                    'infrastruktur': { 
+                        passwordHash: this.hashPassword('infra123'), 
+                        role: 'category_admin', 
+                        categories: ['infrastruktur'],
+                        displayName: 'Admin Infrastruktur',
+                        badge: 'infrastruktur'
+                    },
+                    'kebakaran': { 
+                        passwordHash: this.hashPassword('kebakaran123'), 
+                        role: 'category_admin', 
+                        categories: ['kebakaran'],
+                        displayName: 'Admin Kebakaran',
+                        badge: 'kebakaran'
+                    },
+                    'keamanan': { 
+                        passwordHash: this.hashPassword('keamanan123'), 
+                        role: 'category_admin', 
+                        categories: ['keamanan'],
+                        displayName: 'Admin Keamanan',
+                        badge: 'keamanan'
+                    },
+                    'bencana': { 
+                        passwordHash: this.hashPassword('bencana123'), 
+                        role: 'category_admin', 
+                        categories: ['bencana alam'],
+                        displayName: 'Admin Bencana Alam',
+                        badge: 'bencana-alam'
+                    },
+                    'transport': { 
+                        passwordHash: this.hashPassword('transport123'), 
+                        role: 'category_admin', 
+                        categories: ['transportasi'],
+                        displayName: 'Admin Transportasi',
+                        badge: 'transportasi'
+                    },
+                    'kebersihan': { 
+                        passwordHash: this.hashPassword('kebersihan123'), 
+                        role: 'category_admin', 
+                        categories: ['kebersihan'],
+                        displayName: 'Admin Kebersihan',
+                        badge: 'kebersihan'
+                    }
+                };
+                
+                // Start initialization process
+                this.init();
+            }
+
+            // Initialize loading screen with progress
+            initLoadingScreen() {
+                this.loadingSteps = [
+                    { text: 'Memuat aplikasi', duration: 800 },
+                    { text: 'Memuat data laporan', duration: 600 },
+                    { text: 'Menginisialisasi peta', duration: 700 },
+                    { text: 'Menyiapkan komponen', duration: 500 },
+                    { text: 'Memuat akun pengguna', duration: 400 },
+                    { text: 'Finalisasi aplikasi', duration: 300 }
+                ];
+                
+                this.currentLoadingStep = 0;
+                this.totalLoadingTime = this.loadingSteps.reduce((total, step) => total + step.duration, 0);
+                this.elapsedLoadingTime = 0;
+                
+                // Start loading process
+                setTimeout(() => {
+                    this.processLoadingSteps();
+                }, 500);
+            }
+
+            // Process loading steps with progress updates
+            processLoadingSteps() {
+                if (this.currentLoadingStep >= this.loadingSteps.length) {
+                    // Loading complete
+                    this.completeLoading();
+                    return;
+                }
+
+                const currentStep = this.loadingSteps[this.currentLoadingStep];
+                const progressBar = document.getElementById('loadingProgressBar');
+                const loadingText = document.getElementById('loadingText');
+
+                // Update loading text
+                loadingText.innerHTML = `
+                    ${currentStep.text}<span class="loading-dots">
+                        <span class="loading-dot"></span>
+                        <span class="loading-dot"></span>
+                        <span class="loading-dot"></span>
+                    </span>
+                `;
+
+                // Update progress bar
+                this.elapsedLoadingTime += currentStep.duration;
+                const progressPercentage = (this.elapsedLoadingTime / this.totalLoadingTime) * 100;
+                progressBar.style.width = progressPercentage + '%';
+
+                // Move to next step
+                this.currentLoadingStep++;
+
+                // Continue to next step after duration
+                setTimeout(() => {
+                    this.processLoadingSteps();
+                }, currentStep.duration);
+            }
+
+            // Complete loading and hide loading screen
+            completeLoading() {
+                const loadingScreen = document.getElementById('loadingScreen');
+                const progressBar = document.getElementById('loadingProgressBar');
+                const loadingText = document.getElementById('loadingText');
+
+                // Set progress to 100%
+                progressBar.style.width = '100%';
+                loadingText.innerHTML = 'Aplikasi siap digunakan!';
+
+                // Hide loading screen after a brief delay
+                setTimeout(() => {
+                    loadingScreen.classList.add('hide');
+                    
+                    // Remove loading screen completely after transition
+                    setTimeout(() => {
+                        loadingScreen.remove();
+                        
+                        // Show welcome message
+                        setTimeout(() => {
+                            this.showWelcomeMessage();
+                        }, 500);
+                    }, 500);
+                }, 800);
+            }
+
+            // Simple hash function for password security
+            hashPassword(password) {
+                let hash = 0;
+                for (let i = 0; i < password.length; i++) {
+                    const char = password.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash;
+                }
+                return hash.toString();
+            }
+
+            // Get next report ID
+            getNextReportId() {
+                if (this.reports.length === 0) return 1;
+                return Math.max(...this.reports.map(r => r.id)) + 1;
+            }
+
+            // Load reports from localStorage
+            loadReports() {
+                try {
+                    const saved = localStorage.getItem('peranti_reports');
+                    if (saved) {
+                        const parsed = JSON.parse(saved);
+                        if (Array.isArray(parsed)) {
+                            return parsed;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading reports:', error);
+                    this.showNotification('Error loading data. Starting fresh.', 'error');
+                }
+                return this.getDefaultReports();
+            }
+
+            // Load current user
+            loadCurrentUser() {
+                try {
+                    const saved = localStorage.getItem('peranti_currentUser');
+                    if (saved) {
+                        return JSON.parse(saved);
+                    }
+                } catch (error) {
+                    console.error('Error loading user:', error);
+                }
+                return null;
+            }
+
+            // Save reports
+            saveReports() {
+                try {
+                    localStorage.setItem('peranti_reports', JSON.stringify(this.reports));
+                    return true;
+                } catch (error) {
+                    console.error('Error saving reports:', error);
+                    this.showNotification('Error saving data. Changes may be lost.', 'error');
+                    return false;
+                }
+            }
+
+            // Save current user
+            saveCurrentUser() {
+                try {
+                    if (this.currentUser) {
+                        localStorage.setItem('peranti_currentUser', JSON.stringify(this.currentUser));
+                    } else {
+                        localStorage.removeItem('peranti_currentUser');
+                    }
+                } catch (error) {
+                    console.error('Error saving user:', error);
+                }
+            }
+
+            // Default sample reports
+            getDefaultReports() {
+                return [
+                    {
+                        id: 1,
+                        nama: 'Budi Santoso',
+                        email: 'budi@email.com',
+                        telepon: '08123456789',
+                        judulMasalah: 'Jalan Berlubang di Jl. Sudirman',
+                        kategori: 'infrastruktur',
+                        provinsi: 'dki jakarta',
+                        deskripsi: 'Terdapat lubang besar di tengah jalan yang sangat berbahaya untuk pengendara motor dan mobil.',
+                        prioritas: 'tinggi',
+                        lokasi: 'Jl. Sudirman No. 45, Jakarta Pusat',
+                        tanggal: new Date().toISOString().split('T')[0],
+                        waktu: new Date().toISOString(),
+                        lat: -6.2088 + (Math.random() - 0.5) * 0.01,
+                        lng: 106.8456 + (Math.random() - 0.5) * 0.01,
+                        status: 'terkirim',
+                        foto: null
+                    },
+                    {
+                        id: 2,
+                        nama: 'Siti Nurhaliza',
+                        email: 'siti@email.com',
+                        telepon: '08234567890',
+                        judulMasalah: 'Lampu Jalan Mati',
+                        kategori: 'infrastruktur',
+                        provinsi: 'dki jakarta',
+                        deskripsi: 'Hampir semua lampu penerangan jalan di area ini sudah mati sejak seminggu yang lalu.',
+                        prioritas: 'sedang',
+                        lokasi: 'Jl. Gatot Subroto, Jakarta Selatan',
+                        tanggal: new Date(Date.now() - 86400000).toISOString().split('T')[0],
+                        waktu: new Date(Date.now() - 86400000).toISOString(),
+                        lat: -6.2297 + (Math.random() - 0.5) * 0.01,
+                        lng: 106.8253 + (Math.random() - 0.5) * 0.01,
+                        status: 'diproses',
+                        foto: null
+                    }
+                ];
+            }
+
+            init() {
+                this.initMap();
+                this.setupEventListeners();
+                this.updateMapMarkers();
+                this.updateUI();
+                this.updateDashboard();
+                this.showWelcomeMessage();
+            }
+
+            // Show welcome message
+            showWelcomeMessage() {
+                setTimeout(() => {
+                    this.showNotification('Selamat datang di PERANTI! Sistem pelaporan infrastruktur terintegrasi.', 'info', 5000);
+                }, 1000);
+            }
+
+            // Enhanced map initialization
+            initMap() {
+                this.map = L.map('map', {
+                    center: [-2.5489, 118.0149], // Center of Indonesia
+                    zoom: 5,
+                    zoomControl: true,
+                    minZoom: 4,
+                    maxZoom: 18,
+                    preferCanvas: true
+                });
+
+                // Add enhanced tile layer
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors | PERANTI System',
+                    maxZoom: 18,
+                    tileSize: 256
+                }).addTo(this.map);
+
+                // Map click handler
+                this.map.on('click', (e) => {
+                    if (document.getElementById('formModal').classList.contains('show')) {
+                        this.selectLocationOnMap(e.latlng.lat, e.latlng.lng);
+                    }
+                });
+
+                // Map ready event
+                this.map.whenReady(() => {
+                    setTimeout(() => {
+                        this.map.invalidateSize();
+                    }, 100);
+                });
+            }
+
+            // Enhanced location selection
+            selectLocationOnMap(lat, lng) {
+                this.selectedLocation = { lat, lng };
+                
+                const locationName = this.getLocationName(lat, lng);
+                document.getElementById('lokasi').value = locationName;
+                
+                // Visual feedback
+                const lokasiField = document.getElementById('lokasi');
+                lokasiField.style.borderColor = 'var(--success-color)';
+                lokasiField.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1))';
+                
+                setTimeout(() => {
+                    lokasiField.style.borderColor = 'var(--border-color)';
+                    lokasiField.style.background = 'var(--surface-primary)';
+                }, 3000);
+                
+                this.showNotification('Lokasi berhasil dipilih dari peta!', 'success');
+            }
+
+            // Location name generator
+            getLocationName(lat, lng) {
+                const provinces = [
+                    'DKI Jakarta', 'Jawa Barat', 'Jawa Tengah', 'Jawa Timur', 
+                    'Sumatera Utara', 'Sumatera Selatan', 'Kalimantan Timur', 'Sulawesi Selatan'
+                ];
+                const randomProvince = provinces[Math.floor(Math.random() * provinces.length)];
+                return `Koordinat: ${lat.toFixed(6)}, ${lng.toFixed(6)} (${randomProvince})`;
+            }
+
+            // Enhanced event listeners
+            setupEventListeners() {
+                // Navigation tabs
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        const targetTab = e.target.closest('.nav-tab').dataset.tab;
+                        this.switchTab(targetTab);
+                    });
+                });
+
+                // Form modal controls
+                document.getElementById('addReportBtn').addEventListener('click', () => {
+                    document.getElementById('formModal').classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                });
+
+                document.getElementById('closeFormBtn').addEventListener('click', () => {
+                    this.closeModal('formModal');
+                });
+
+                // Report form submission
+                document.getElementById('reportForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.submitReport();
+                });
+
+                // Photo handling
+                document.getElementById('foto').addEventListener('change', (e) => {
+                    this.handlePhotoUpload(e);
+                });
+
+                document.getElementById('removePhoto').addEventListener('click', () => {
+                    this.removePhoto();
+                });
+
+                // Photo modal
+                document.getElementById('photoModalClose').addEventListener('click', () => {
+                    this.closeModal('photoModal');
+                });
+
+                // Location controls
+                document.getElementById('getCurrentLocation').addEventListener('click', () => {
+                    this.getCurrentLocation();
+                });
+
+                document.getElementById('myLocationBtn').addEventListener('click', () => {
+                    this.getCurrentLocation(true);
+                });
+
+                // Map controls
+                document.getElementById('refreshMapBtn').addEventListener('click', () => {
+                    this.refreshMap();
+                });
+
+                document.getElementById('clearDataBtn').addEventListener('click', () => {
+                    this.handleClearData();
+                });
+
+                // Search and filters
+                ['searchInput', 'priorityFilter', 'categoryFilter', 'statusFilter'].forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.addEventListener('input', () => this.debounce(() => this.updateMapMarkers(), 300));
+                        element.addEventListener('change', () => this.updateMapMarkers());
+                    }
+                });
+
+                // Province filter
+                document.getElementById('provinceFilter').addEventListener('change', () => {
+                    this.updateMapMarkers();
+                    if (this.currentUser) {
+                        this.updateDashboard();
+                    }
+                });
+
+                // Login form
+                document.getElementById('loginForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleLogin();
+                });
+
+                // Status modal
+                document.getElementById('closeStatusBtn').addEventListener('click', () => {
+                    this.closeModal('statusModal');
+                });
+
+                document.getElementById('statusForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.updateReportStatus();
+                });
+
+                // ESC key to close modals
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.closeAllModals();
+                    }
+                });
+            }
+
+            // Debounce function
+            debounce(func, wait) {
+                clearTimeout(this.debounceTimer);
+                this.debounceTimer = setTimeout(func, wait);
+            }
+
+            // Modal management
+            closeModal(modalId) {
+                const modal = document.getElementById(modalId);
+                modal.classList.remove('show');
+                document.body.style.overflow = 'auto';
+                if (modalId === 'formModal') {
+                    this.resetForm();
+                }
+            }
+
+            closeAllModals() {
+                ['formModal', 'photoModal', 'statusModal'].forEach(modalId => {
+                    this.closeModal(modalId);
+                });
+            }
+
+            // Enhanced photo upload
+            handlePhotoUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                // Validation
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    this.showNotification('Format file tidak didukung! Gunakan JPG, PNG, atau WebP.', 'error');
+                    event.target.value = '';
+                    return;
+                }
+
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                if (file.size > maxSize) {
+                    this.showNotification('Ukuran file terlalu besar! Maksimal 5MB.', 'error');
+                    event.target.value = '';
+                    return;
+                }
+
+                // Show loading
+                const uploadContent = document.querySelector('.photo-upload-content');
+                uploadContent.innerHTML = '<div class="loading-spinner"></div><div style="margin-top: 12px;">Mengunggah foto...</div>';
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.compressImage(e.target.result, (compressedImage) => {
+                        this.selectedPhoto = compressedImage;
+                        this.showPhotoPreview();
+                    });
+                };
+                
+                reader.onerror = () => {
+                    this.showNotification('Gagal membaca file foto!', 'error');
+                    this.resetPhotoUpload();
+                };
+                
+                reader.readAsDataURL(file);
+            }
+
+            // Image compression
+            compressImage(dataUrl, callback) {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    const maxWidth = 800;
+                    const maxHeight = 600;
+                    
+                    let { width, height } = img;
+                    
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height = (height * maxWidth) / width;
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width = (width * maxHeight) / height;
+                            height = maxHeight;
+                        }
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    callback(compressedDataUrl);
+                };
+                img.src = dataUrl;
+            }
+
+            // Show photo preview
+            showPhotoPreview() {
+                const preview = document.getElementById('photoPreview');
+                const removeBtn = document.getElementById('removePhoto');
+                const uploadContent = document.querySelector('.photo-upload-content');
+                
+                preview.src = this.selectedPhoto;
+                preview.style.display = 'block';
+                removeBtn.style.display = 'inline-block';
+                uploadContent.style.display = 'none';
+            }
+
+            // Reset photo upload
+            resetPhotoUpload() {
+                const uploadContent = document.querySelector('.photo-upload-content');
+                uploadContent.innerHTML = `
+                    <div style="font-size: 3rem; margin-bottom: 12px;">📷</div>
+                    <div style="font-weight: 600; margin-bottom: 8px; font-size: 1rem;">Klik untuk mengunggah foto</div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary);">Format: JPG, PNG, WebP (Maksimal 5MB)</div>
+                `;
+            }
+
+            // Remove photo
+            removePhoto() {
+                this.selectedPhoto = null;
+                const preview = document.getElementById('photoPreview');
+                const removeBtn = document.getElementById('removePhoto');
+                const uploadContent = document.querySelector('.photo-upload-content');
+                const fileInput = document.getElementById('foto');
+                
+                preview.style.display = 'none';
+                removeBtn.style.display = 'none';
+                uploadContent.style.display = 'block';
+                fileInput.value = '';
+                this.resetPhotoUpload();
+            }
+
+            // Enhanced form validation
+            validateForm() {
+                const formData = new FormData(document.getElementById('reportForm'));
+                const errors = [];
+
+                // Validation checks
+                const nama = formData.get('nama').trim();
+                if (nama.length < 3 || nama.length > 50) {
+                    errors.push('Nama harus 3-15 karakter');
+                }
+
+                const email = formData.get('email').trim();
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    errors.push('Format email tidak valid');
+                }
+
+                const telepon = formData.get('telepon').trim();
+                const teleponRegex = /^(\+62|62|0)[8-9][0-9]{8,11}$/;
+                if (!teleponRegex.test(telepon)) {
+                    errors.push('Nomor telepon tidak valid');
+                }
+
+                if (!this.selectedPhoto) {
+                    errors.push('Upload foto bukti masalah');
+                }
+
+                if (!this.selectedLocation) {
+                    errors.push('Tentukan lokasi di peta atau gunakan GPS');
+                }
+
+                if (errors.length > 0) {
+                    this.showNotification(errors[0], 'error');
+                    return false;
+                }
+
+                return true;
+            }
+
+            // Enhanced report submission
+            async submitReport() {
+                if (!this.validateForm()) {
+                    return;
+                }
+
+                const submitBtn = document.querySelector('#reportForm .submit-btn');
+                const submitText = document.getElementById('submitBtnText');
+                const submitLoading = document.getElementById('submitBtnLoading');
+                
+                submitBtn.disabled = true;
+                submitText.style.display = 'none';
+                submitLoading.style.display = 'inline-block';
+
+                try {
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+
+                    const formData = new FormData(document.getElementById('reportForm'));
+                    
+                    const newReport = {
+                        id: this.reportIdCounter++,
+                        nama: formData.get('nama').trim(),
+                        email: formData.get('email').trim().toLowerCase(),
+                        telepon: formData.get('telepon').trim(),
+                        judulMasalah: formData.get('judulMasalah').trim(),
+                        kategori: formData.get('kategori'),
+                        provinsi: formData.get('provinsi'),
+                        deskripsi: formData.get('deskripsi').trim(),
+                        prioritas: formData.get('prioritas'),
+                        lokasi: formData.get('lokasi').trim(),
+                        tanggal: new Date().toISOString().split('T')[0],
+                        waktu: new Date().toISOString(),
+                        lat: this.selectedLocation.lat,
+                        lng: this.selectedLocation.lng,
+                        status: 'terkirim',
+                        foto: this.selectedPhoto,
+                        statusHistory: [{
+                            status: 'terkirim',
+                            tanggal: new Date().toISOString(),
+                            catatan: 'Laporan berhasil dikirim'
+                        }]
+                    };
+
+                    this.reports.push(newReport);
+                    
+                    if (!this.saveReports()) {
+                        throw new Error('Gagal menyimpan data');
+                    }
+                    
+                    this.resetForm();
+                    this.updateMapMarkers();
+                    
+                    if (this.currentUser) {
+                        this.updateDashboard();
+                    }
+
+                    document.getElementById('successMessage').classList.add('show');
+                    this.showNotification('Laporan berhasil dikirim!', 'success');
+                    
+                    setTimeout(() => {
+                        this.closeModal('formModal');
+                        document.getElementById('successMessage').classList.remove('show');
+                    }, 2500);
+
+                } catch (error) {
+                    console.error('Error submitting report:', error);
+                    this.showNotification('Gagal mengirim laporan. Silakan coba lagi.', 'error');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitText.style.display = 'inline-block';
+                    submitLoading.style.display = 'none';
+                }
+            }
+
+            // Enhanced location detection
+            getCurrentLocation(centerMap = false) {
+                if (!navigator.geolocation) {
+                    this.showNotification('Browser tidak mendukung Geolocation API.', 'error');
+                    return;
+                }
+
+                const locationBtn = document.getElementById('getCurrentLocation');
+                const originalText = locationBtn.innerHTML;
+                locationBtn.innerHTML = '<span class="loading-spinner"></span> Mendapatkan lokasi...';
+                locationBtn.disabled = true;
+
+                const options = {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 30000
+                };
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        const accuracy = position.coords.accuracy;
+                        
+                        this.selectedLocation = { lat, lng };
+                        
+                        const locationName = `GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)} (Akurasi: ${Math.round(accuracy)}m)`;
+                        
+                        if (document.getElementById('lokasi')) {
+                            document.getElementById('lokasi').value = locationName;
+                            this.highlightField(document.getElementById('lokasi'));
+                        }
+
+                        if (centerMap && this.map) {
+                            this.map.setView([lat, lng], 15);
+                            
+                            const marker = L.marker([lat, lng]).addTo(this.map);
+                            const circle = L.circle([lat, lng], {
+                                radius: accuracy,
+                                fillOpacity: 0.1,
+                                color: 'var(--primary-color)'
+                            }).addTo(this.map);
+                            
+                            marker.bindPopup('📍 Lokasi Anda saat ini').openPopup();
+                            
+                            setTimeout(() => {
+                                this.map.removeLayer(marker);
+                                this.map.removeLayer(circle);
+                            }, 5000);
+                        }
+                        
+                        this.showNotification(`Lokasi berhasil didapatkan! (Akurasi: ${Math.round(accuracy)}m)`, 'success');
+                    },
+                    (error) => {
+                        let errorMessage;
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage = "Akses lokasi ditolak. Silakan izinkan akses lokasi.";
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage = "Informasi lokasi tidak tersedia.";
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage = "Waktu untuk mendapatkan lokasi habis.";
+                                break;
+                            default:
+                                errorMessage = "Terjadi kesalahan saat mendapatkan lokasi.";
+                                break;
+                        }
+                        this.showNotification(errorMessage, 'error');
+                    },
+                    options
+                );
+
+                setTimeout(() => {
+                    locationBtn.innerHTML = originalText;
+                    locationBtn.disabled = false;
+                }, 15000);
+            }
+
+            // Highlight field helper
+            highlightField(field) {
+                field.style.borderColor = 'var(--success-color)';
+                field.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1))';
+                field.style.transition = 'all 0.3s ease';
+                
+                setTimeout(() => {
+                    field.style.borderColor = 'var(--border-color)';
+                    field.style.background = 'var(--surface-primary)';
+                }, 2000);
+            }
+
+            // Reset form
+            resetForm() {
+                document.getElementById('reportForm').reset();
+                this.selectedLocation = null;
+                this.removePhoto();
+            }
+
+            // User authorization
+            canAccessCategory(category) {
+                if (!this.currentUser) return false;
+                const userAccount = this.userAccounts[this.currentUser.username];
+                if (!userAccount) return false;
+                return userAccount.categories.includes('all') || userAccount.categories.includes(category);
+            }
+
+            // Get accessible reports
+            getAccessibleReports() {
+                let filtered = [...this.reports];
+                
+                if (this.currentUser) {
+                    const userAccount = this.userAccounts[this.currentUser.username];
+                    if (userAccount && !userAccount.categories.includes('all')) {
+                        filtered = filtered.filter(report => 
+                            userAccount.categories.includes(report.kategori)
+                        );
+                    }
+                }
+
+                const selectedProvince = document.getElementById('provinceFilter')?.value || 'all';
+                if (selectedProvince !== 'all') {
+                    filtered = filtered.filter(report => 
+                        report.provinsi === selectedProvince
+                    );
+                }
+
+                return filtered;
+            }
+
+            // Enhanced map markers
+            updateMapMarkers() {
+                this.markers.forEach(marker => this.map.removeLayer(marker));
+                this.markers = [];
+
+                let filteredReports = this.getFilteredReports();
+                
+                if (this.currentUser) {
+                    const accessibleReports = this.getAccessibleReports();
+                    filteredReports = filteredReports.filter(report => 
+                        accessibleReports.some(accessible => accessible.id === report.id)
+                    );
+                }
+
+                const priorityColors = {
+                    'tinggi': 'var(--danger-color)',
+                    'sedang': 'var(--warning-color)',
+                    'rendah': 'var(--success-color)'
+                };
+
+                const statusColors = {
+                    'terkirim': 'var(--info-color)',
+                    'diproses': 'var(--warning-color)',
+                    'selesai': 'var(--success-color)',
+                    'ditolak': 'var(--danger-color)'
+                };
+
+                const kategoriIcon = {
+                    'infrastruktur': '🏗️',
+                    'kebakaran': '🔥',
+                    'keamanan': '🚨',
+                    'bencana alam': '🌳',
+                    'transportasi': '🚌',
+                    'kebersihan': '🧹',
+                    'lainnya': '📋'
+                };
+
+                filteredReports.forEach(report => {
+                    const customIcon = L.divIcon({
+                        className: 'custom-marker',
+                        html: `<div style="
+                            background: ${priorityColors[report.prioritas]}; 
+                            color: white; 
+                            width: 40px; 
+                            height: 40px; 
+                            border-radius: 50%; 
+                            display: flex; 
+                            align-items: center; 
+                            justify-content: center; 
+                            font-size: 20px;
+                            border: 3px solid ${statusColors[report.status]};
+                            box-shadow: var(--shadow-lg);
+                            position: relative;
+                        ">${kategoriIcon[report.kategori] || '📋'}
+                        <div style="
+                            position: absolute;
+                            bottom: -3px;
+                            right: -3px;
+                            width: 14px;
+                            height: 14px;
+                            background: ${statusColors[report.status]};
+                            border: 2px solid white;
+                            border-radius: 50%;
+                        "></div></div>`,
+                        iconSize: [40, 40],
+                        iconAnchor: [20, 20]
+                    });
+
+                    const marker = L.marker([report.lat, report.lng], { icon: customIcon });
+
+                    const popupContent = `
+                        <div class="popup-content">
+                            <div class="popup-title">${kategoriIcon[report.kategori] || '📋'} ${report.judulMasalah}</div>
+                            <div class="popup-meta">🏛️ ${this.getProvinceDisplayName(report.provinsi)}</div>
+                            <div class="popup-meta">📍 ${report.lokasi}</div>
+                            <div class="popup-meta">👤 ${report.nama}</div>
+                            <div class="popup-meta">📅 ${new Date(report.tanggal).toLocaleDateString('id-ID')}</div>
+                            <div class="popup-meta">
+                                <span class="priority-badge priority-${report.prioritas}">${report.prioritas}</span>
+                                <span class="status-badge status-${report.status}">${report.status}</span>
+                            </div>
+                            ${report.foto ? `<img src="${report.foto}" class="popup-photo" onclick="app.showPhotoModal('${report.foto}')" alt="Foto bukti">` : ''}
+                            <div style="margin-top: 12px;">
+                                <button class="popup-btn" onclick="app.showReportDetail(${report.id})">
+                                    👁️ Detail
+                                </button>
+                                ${report.foto ? `<button class="popup-btn" onclick="app.showPhotoModal('${report.foto}')">🖼️ Foto</button>` : ''}
+                                ${this.currentUser ? `<button class="popup-btn" onclick="app.openStatusModal(${report.id})">📊 Status</button>` : ''}
+                            </div>
+                        </div>
+                    `;
+
+                    marker.bindPopup(popupContent, {
+                        maxWidth: 280,
+                        className: 'custom-popup'
+                    });
+                    marker.addTo(this.map);
+                    this.markers.push(marker);
+                });
+
+                if (this.markers.length > 0 && filteredReports.length <= 20) {
+                    const group = new L.featureGroup(this.markers);
+                    this.map.fitBounds(group.getBounds().pad(0.1), { maxZoom: 12 });
+                }
+            }
+
+            // Get filtered reports
+            getFilteredReports() {
+                let filtered = [...this.reports];
+
+                const searchTerm = document.getElementById('searchInput')?.value.toLowerCase().trim() || '';
+                if (searchTerm) {
+                    filtered = filtered.filter(report => 
+                        report.judulMasalah.toLowerCase().includes(searchTerm) ||
+                        report.lokasi.toLowerCase().includes(searchTerm) ||
+                        report.kategori.toLowerCase().includes(searchTerm) ||
+                        report.nama.toLowerCase().includes(searchTerm) ||
+                        report.provinsi.toLowerCase().includes(searchTerm) ||
+                        report.deskripsi.toLowerCase().includes(searchTerm)
+                    );
+                }
+
+                const priorityFilter = document.getElementById('priorityFilter')?.value || 'all';
+                if (priorityFilter !== 'all') {
+                    filtered = filtered.filter(report => report.prioritas === priorityFilter);
+                }
+
+                const categoryFilter = document.getElementById('categoryFilter')?.value || 'all';
+                if (categoryFilter !== 'all') {
+                    filtered = filtered.filter(report => report.kategori === categoryFilter);
+                }
+
+                const statusFilter = document.getElementById('statusFilter')?.value || 'all';
+                if (statusFilter !== 'all') {
+                    filtered = filtered.filter(report => report.status === statusFilter);
+                }
+
+                return filtered;
+            }
+
+            // Enhanced UI update
+            updateUI() {
+                const userInfo = document.getElementById('userInfo');
+                const dashboardTab = document.getElementById('dashboardTab');
+                const loginTab = document.getElementById('loginTab');
+                const clearDataBtn = document.getElementById('clearDataBtn');
+                const adminControls = document.getElementById('adminControls');
+
+                if (this.currentUser) {
+                    const userAccount = this.userAccounts[this.currentUser.username];
+                    if (userAccount) {
+                        userInfo.innerHTML = `
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="width: 8px; height: 8px; background: var(--success-color); border-radius: 50%;"></div>
+                                <span style="font-weight: 600;">👤 ${userAccount.displayName}</span>
+                                <span style="background: var(--primary-color); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600;">${userAccount.badge.toUpperCase()}</span>
+                                <button class="logout-btn" id="logoutBtn">🚪 Logout</button>
+                            </div>
+                        `;
+                        
+                        dashboardTab.classList.remove('hidden');
+                        loginTab.classList.add('hidden');
+                        adminControls.classList.remove('hidden');
+                        
+                        if (userAccount.categories.includes('all')) {
+                            clearDataBtn.classList.remove('hidden');
+                        }
+                        
+                        document.getElementById('logoutBtn').addEventListener('click', () => {
+                            this.handleLogout();
+                        });
+                    }
+                } else {
+                    userInfo.innerHTML = '';
+                    dashboardTab.classList.add('hidden');
+                    loginTab.classList.remove('hidden');
+                    clearDataBtn.classList.add('hidden');
+                    adminControls.classList.add('hidden');
+                }
+            }
+
+            // Login handling
+            handleLogin() {
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value;
+
+                if (!username || !password) {
+                    this.showNotification('Username dan password wajib diisi!', 'error');
+                    return;
+                }
+
+                const userAccount = this.userAccounts[username];
+                const passwordHash = this.hashPassword(password);
+                
+                if (userAccount && userAccount.passwordHash === passwordHash) {
+                    this.currentUser = { 
+                        username: username,
+                        role: userAccount.role,
+                        categories: userAccount.categories,
+                        loginTime: new Date().toISOString()
+                    };
+                    
+                    this.saveCurrentUser();
+                    this.showNotification(`Login berhasil! Selamat datang, ${userAccount.displayName}`, 'success');
+                    this.updateUI();
+                    this.updateDashboard();
+                    this.updateMapMarkers();
+                    this.switchTab('dashboard');
+                    
+                    document.getElementById('loginForm').reset();
+                } else {
+                    this.showNotification('Username atau password salah!', 'error');
+                    document.getElementById('password').value = '';
+                }
+            }
+
+            // Logout handling
+            handleLogout() {
+                if (confirm('Apakah Anda yakin ingin logout?')) {
+                    this.currentUser = null;
+                    this.saveCurrentUser();
+                    this.updateUI();
+                    this.updateDashboard();
+                    this.updateMapMarkers();
+                    this.switchTab('map');
+                    this.showNotification('Berhasil logout!', 'success');
+                }
+            }
+
+            // Enhanced dashboard
+            updateDashboard() {
+                const dashboardPanel = document.getElementById('dashboardPanel');
+                
+                if (this.currentUser) {
+                    const userAccount = this.userAccounts[this.currentUser.username];
+                    if (userAccount) {
+                        dashboardPanel.className = 'admin-panel';
+                        
+                        const accessibleReports = this.getAccessibleReports();
+                        const categoryFilter = userAccount.categories.includes('all') ? 
+                            'Semua Kategori' : 
+                            userAccount.categories.map(cat => this.getCategoryDisplayName(cat)).join(', ');
+
+                        const selectedProvince = document.getElementById('provinceFilter')?.value || 'all';
+                        const provinceFilter = selectedProvince === 'all' ? 'Seluruh Indonesia' : 
+                            this.getProvinceDisplayName(selectedProvince);
+
+                        dashboardPanel.innerHTML = `
+                            <div style="margin-bottom: 32px;">
+                                <h2 style="margin-bottom: 8px; color: var(--text-primary); font-size: 2rem; font-weight: 800;">
+                                    📊 Dashboard ${userAccount.displayName}
+                                </h2>
+                                <p style="color: var(--text-secondary); font-size: 1rem;">Kelola dan pantau laporan infrastruktur</p>
+                            </div>
+                            
+                            ${!userAccount.categories.includes('all') ? `
+                                <div style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; padding: 16px 24px; border-radius: 16px; margin-bottom: 24px; font-weight: 500;">
+                                    📂 Menampilkan laporan kategori: ${categoryFilter}
+                                </div>
+                            ` : ''}
+                            
+                            ${selectedProvince !== 'all' ? `
+                                <div style="background: linear-gradient(135deg, var(--success-color), #059669); color: white; padding: 16px 24px; border-radius: 16px; margin-bottom: 24px; font-weight: 500;">
+                                    🏛️ Menampilkan laporan dari: ${provinceFilter}
+                                </div>
+                            ` : ''}
+                            
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-number" id="totalReports">0</div>
+                                    <div class="stat-label">📋 Total Laporan</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number" id="highPriorityReports">0</div>
+                                    <div class="stat-label">🔴 Prioritas Tinggi</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number" id="todayReports">0</div>
+                                    <div class="stat-label">📅 Hari Ini</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number" id="pendingReports">0</div>
+                                    <div class="stat-label">⏳ Butuh Tindakan</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number" id="completedReports">0</div>
+                                    <div class="stat-label">✅ Selesai</div>
+                                </div>
+                            </div>
+
+                            <div class="reports-table">
+                                <div class="table-header">
+                                    <span>📋 Daftar Laporan ${categoryFilter} - ${provinceFilter}</span>
+                                    <div style="display: flex; gap: 12px;">
+                                        <button id="exportBtn" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 10px 16px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                                            📥 Export CSV
+                                        </button>
+                                        <button id="refreshDashboardBtn" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 10px 16px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                                            🔄 Refresh
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="reportsContainer">
+                                    <!-- Reports will be loaded here -->
+                                </div>
+                                <div class="pagination" id="pagination">
+                                    <!-- Pagination will be loaded here -->
+                                </div>
+                            </div>
+                        `;
+                        
+                        document.getElementById('exportBtn').addEventListener('click', () => {
+                            this.exportToCSV();
+                        });
+
+                        document.getElementById('refreshDashboardBtn').addEventListener('click', () => {
+                            this.refreshDashboard();
+                        });
+                        
+                        this.updateDashboardStats();
+                        this.updateDashboardReports();
+                    }
+                } else {
+                    dashboardPanel.className = 'admin-panel';
+                    dashboardPanel.innerHTML = `
+                        <div style="display: flex; justify-content: center; align-items: center; min-height: 60vh;">
+                            <div style="background: var(--surface-primary); padding: 40px; border-radius: 20px; box-shadow: var(--shadow-xl); text-align: center; max-width: 400px; border: 1px solid var(--border-color);">
+                                <div style="font-size: 4rem; margin-bottom: 20px;">🔒</div>
+                                <h3 style="color: var(--text-primary); margin-bottom: 16px; font-size: 1.5rem; font-weight: 700;">Akses Dashboard</h3>
+                                <p style="color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6;">Anda harus login terlebih dahulu untuk mengakses dashboard admin dan mengelola laporan.</p>
+                                <button onclick="app.switchTab('login')" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; padding: 12px 24px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                                    🔐 Login Sekarang
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            // Dashboard statistics
+            updateDashboardStats() {
+                if (!this.currentUser) return;
+                
+                const accessibleReports = this.getAccessibleReports();
+                const today = new Date().toISOString().split('T')[0];
+                
+                const stats = {
+                    total: accessibleReports.length,
+                    highPriority: accessibleReports.filter(r => r.prioritas === 'tinggi').length,
+                    today: accessibleReports.filter(r => r.tanggal === today).length,
+                    pending: accessibleReports.filter(r => ['terkirim', 'diproses'].includes(r.status)).length,
+                    completed: accessibleReports.filter(r => r.status === 'selesai').length
+                };
+                
+                this.animateCounter('totalReports', stats.total);
+                this.animateCounter('highPriorityReports', stats.highPriority);
+                this.animateCounter('todayReports', stats.today);
+                this.animateCounter('pendingReports', stats.pending);
+                this.animateCounter('completedReports', stats.completed);
+            }
+
+            // Animate counter
+            animateCounter(elementId, targetValue) {
+                const element = document.getElementById(elementId);
+                if (!element) return;
+                
+                const currentValue = parseInt(element.textContent) || 0;
+                const increment = Math.ceil((targetValue - currentValue) / 20);
+                
+                if (currentValue !== targetValue) {
+                    element.textContent = Math.min(currentValue + increment, targetValue);
+                    setTimeout(() => this.animateCounter(elementId, targetValue), 50);
+                }
+            }
+
+            // Dashboard reports
+            updateDashboardReports() {
+                if (!this.currentUser) return;
+                
+                const container = document.getElementById('reportsContainer');
+                if (!container) return;
+                
+                const accessibleReports = this.getAccessibleReports()
+                    .sort((a, b) => new Date(b.waktu) - new Date(a.waktu));
+
+                if (accessibleReports.length === 0) {
+                    container.innerHTML = `
+                        <div style="padding: 60px; text-align: center; color: var(--text-secondary);">
+                            <div style="font-size: 4rem; margin-bottom: 16px;">🔍</div>
+                            <h3 style="margin-bottom: 8px; color: var(--text-primary);">Belum Ada Laporan</h3>
+                            <p>Belum ada laporan yang tersedia untuk kategori dan wilayah yang dipilih.</p>
+                        </div>
+                    `;
+                    document.getElementById('pagination').innerHTML = '';
+                    return;
+                }
+
+                // Pagination
+                const totalPages = Math.ceil(accessibleReports.length / this.reportsPerPage);
+                const startIndex = (this.currentPage - 1) * this.reportsPerPage;
+                const endIndex = startIndex + this.reportsPerPage;
+                const paginatedReports = accessibleReports.slice(startIndex, endIndex);
+
+                container.innerHTML = '';
+                
+                const kategoriIcon = {
+                    'infrastruktur': '🏗️',
+                    'kebakaran': '🔥',
+                    'keamanan': '🚨',
+                    'bencana alam': '🌳',
+                    'transportasi': '🚌',
+                    'kebersihan': '🧹',
+                    'lainnya': '📋'
+                };
+
+                paginatedReports.forEach(report => {
+                    const reportDiv = document.createElement('div');
+                    reportDiv.className = 'report-item';
+                    reportDiv.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                            <div>
+                                <div style="font-weight: 700; font-size: 1.1rem; margin-bottom: 4px; color: var(--text-primary);">
+                                    ${kategoriIcon[report.kategori] || '📋'} ${report.judulMasalah}
+                                </div>
+                                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                    <span class="priority-badge priority-${report.prioritas}">${report.prioritas}</span>
+                                    <span class="status-badge status-${report.status}">${report.status}</span>
+                                </div>
+                            </div>
+                            ${report.foto ? `
+                                <img src="${report.foto}" onclick="app.showPhotoModal('${report.foto}')" 
+                                     style="width: 80px; height: 60px; object-fit: cover; border-radius: 8px; cursor: pointer; box-shadow: var(--shadow-md); transition: transform 0.3s ease;" 
+                                     onmouseover="this.style.transform='scale(1.05)'" 
+                                     onmouseout="this.style.transform='scale(1)'"
+                                     alt="Foto bukti">
+                            ` : ''}
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; margin-bottom: 12px; font-size: 0.85rem; color: var(--text-secondary);">
+                            <div><strong>👤 Pelapor:</strong> ${report.nama}</div>
+                            <div><strong>📧 Email:</strong> <a href="mailto:${report.email}" style="color: var(--primary-color);">${report.email}</a></div>
+                            <div><strong>📱 Telepon:</strong> <a href="tel:${report.telepon}" style="color: var(--primary-color);">${report.telepon}</a></div>
+                            <div><strong>📂 Kategori:</strong> ${this.getCategoryDisplayName(report.kategori)}</div>
+                            <div><strong>🏛️ Provinsi:</strong> ${this.getProvinceDisplayName(report.provinsi)}</div>
+                            <div><strong>📅 Tanggal:</strong> ${new Date(report.tanggal).toLocaleDateString('id-ID')}</div>
+                        </div>
+                        
+                        <div style="margin-bottom: 12px;">
+                            <div style="font-weight: 600; margin-bottom: 4px; color: var(--text-primary);">📍 Lokasi:</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">${report.lokasi}</div>
+                        </div>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <div style="font-weight: 600; margin-bottom: 4px; color: var(--text-primary);">📝 Deskripsi:</div>
+                            <div style="background: var(--surface-secondary); padding: 12px; border-radius: 8px; font-size: 0.9rem; line-height: 1.5; color: var(--text-secondary);">
+                                ${report.deskripsi.length > 150 ? report.deskripsi.substring(0, 150) + '...' : report.deskripsi}
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button onclick="app.showReportDetail(${report.id})" style="background: var(--info-color); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.3s ease;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='var(--info-color)'">
+                                👁️ Detail Lengkap
+                            </button>
+                            <button onclick="app.showOnMap(${report.lat}, ${report.lng})" style="background: var(--success-color); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.3s ease;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='var(--success-color)'">
+                                🗺️ Lihat di Peta
+                            </button>
+                            <button onclick="app.openStatusModal(${report.id})" style="background: var(--warning-color); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.3s ease;" onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='var(--warning-color)'">
+                                📊 Ubah Status
+                            </button>
+                            ${report.foto ? `<button onclick="app.showPhotoModal('${report.foto}')" style="background: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.3s ease;" onmouseover="this.style.background='var(--secondary-color)'" onmouseout="this.style.background='var(--primary-color)'">🖼️ Lihat Foto</button>` : ''}
+                            <button onclick="app.deleteReport(${report.id})" style="background: var(--danger-color); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.3s ease;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='var(--danger-color)'">
+                                🗑️ Hapus
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(reportDiv);
+                });
+
+                this.updatePagination(totalPages, accessibleReports.length);
+            }
+
+            // Pagination
+            updatePagination(totalPages, totalReports) {
+                const paginationContainer = document.getElementById('pagination');
+                if (!paginationContainer || totalPages <= 1) {
+                    paginationContainer.innerHTML = '';
+                    return;
+                }
+
+                let paginationHTML = `
+                    <button ${this.currentPage === 1 ? 'disabled' : ''} onclick="app.changePage(${this.currentPage - 1})" style="background: var(--surface-primary); border: 1px solid var(--border-color); padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s ease; ${this.currentPage === 1 ? 'opacity: 0.5; cursor: not-allowed;' : ''}" ${this.currentPage !== 1 ? `onmouseover="this.style.background='var(--surface-secondary)'" onmouseout="this.style.background='var(--surface-primary)'"` : ''}>
+                        ← Sebelumnya
+                    </button>
+                `;
+
+                const startPage = Math.max(1, this.currentPage - 2);
+                const endPage = Math.min(totalPages, this.currentPage + 2);
+
+                for (let i = startPage; i <= endPage; i++) {
+                    paginationHTML += `
+                        <button onclick="app.changePage(${i})" style="background: ${i === this.currentPage ? 'var(--primary-color)' : 'var(--surface-primary)'}; color: ${i === this.currentPage ? 'white' : 'var(--text-primary)'}; border: 1px solid ${i === this.currentPage ? 'var(--primary-color)' : 'var(--border-color)'}; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;" ${i !== this.currentPage ? `onmouseover="this.style.background='var(--surface-secondary)'" onmouseout="this.style.background='var(--surface-primary)'"` : ''}>
+                            ${i}
+                        </button>
+                    `;
+                }
+
+                paginationHTML += `
+                    <button ${this.currentPage === totalPages ? 'disabled' : ''} onclick="app.changePage(${this.currentPage + 1})" style="background: var(--surface-primary); border: 1px solid var(--border-color); padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s ease; ${this.currentPage === totalPages ? 'opacity: 0.5; cursor: not-allowed;' : ''}" ${this.currentPage !== totalPages ? `onmouseover="this.style.background='var(--surface-secondary)'" onmouseout="this.style.background='var(--surface-primary)'"` : ''}>
+                        Selanjutnya →
+                    </button>
+                `;
+
+                paginationHTML += `<div style="margin-left: 20px; color: var(--text-secondary); font-size: 0.9rem; display: flex; align-items: center;">
+                    Menampilkan ${((this.currentPage - 1) * this.reportsPerPage) + 1}-${Math.min(this.currentPage * this.reportsPerPage, totalReports)} dari ${totalReports} laporan
+                </div>`;
+
+                paginationContainer.innerHTML = paginationHTML;
+            }
+
+            // Change page
+            changePage(newPage) {
+                this.currentPage = newPage;
+                this.updateDashboardReports();
+            }
+
+            // Tab switching
+            switchTab(tabName) {
+                if (tabName === 'dashboard' && !this.currentUser) {
+                    this.showNotification('Silakan login terlebih dahulu untuk mengakses dashboard!', 'error');
+                    tabName = 'login';
+                }
+
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                const targetTab = document.querySelector(`[data-tab="${tabName}"]`);
+                if (targetTab && !targetTab.classList.contains('hidden')) {
+                    targetTab.classList.add('active');
+                }
+
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(`${tabName}Section`).classList.add('active');
+
+                if (tabName === 'map') {
+                    setTimeout(() => {
+                        this.map.invalidateSize();
+                        this.updateMapMarkers();
+                    }, 100);
+                }
+
+                if (tabName === 'dashboard') {
+                    this.updateDashboard();
+                }
+            }
+
+            // Report detail modal
+            showReportDetail(reportId) {
+                const report = this.reports.find(r => r.id === reportId);
+                if (!report) {
+                    this.showNotification('Laporan tidak ditemukan!', 'error');
+                    return;
+                }
+
+                if (this.currentUser && !this.canAccessCategory(report.kategori)) {
+                    this.showNotification('Akses ditolak untuk laporan kategori ini!', 'error');
+                    return;
+                }
+
+                const kategoriIcon = {
+                    'infrastruktur': '🏗️',
+                    'kebakaran': '🔥',
+                    'keamanan': '🚨',
+                    'bencana alam': '🌳',
+                    'transportasi': '🚌',
+                    'kebersihan': '🧹',
+                    'lainnya': '📋'
+                };
+
+                const overlay = document.createElement('div');
+                overlay.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                    background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); 
+                    z-index: 3000; display: flex; justify-content: center; 
+                    align-items: center; padding: 20px;
+                `;
+
+                overlay.innerHTML = `
+                    <div style="background: var(--surface-primary); border-radius: 24px; padding: 32px; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-xl); border: 1px solid var(--border-color);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid var(--primary-color);">
+                            <h2 style="color: var(--text-primary); font-size: 1.5rem; font-weight: 700;">
+                                ${kategoriIcon[report.kategori] || '📋'} ${report.judulMasalah}
+                            </h2>
+                            <button onclick="this.parentElement.parentElement.parentElement.remove(); document.body.style.overflow='auto'" style="background: var(--surface-secondary); border: none; width: 40px; height: 40px; border-radius: 12px; cursor: pointer; color: var(--text-secondary); font-size: 1.5rem; transition: all 0.3s ease;" onmouseover="this.style.background='var(--danger-color)'; this.style.color='white'" onmouseout="this.style.background='var(--surface-secondary)'; this.style.color='var(--text-secondary)'">×</button>
+                        </div>
+                        
+                        ${report.foto ? `
+                            <div style="text-align: center; margin-bottom: 24px;">
+                                <img src="${report.foto}" onclick="app.showPhotoModal('${report.foto}')" 
+                                     style="max-width: 100%; max-height: 300px; border-radius: 12px; cursor: pointer; box-shadow: var(--shadow-lg); transition: transform 0.3s ease;"
+                                     onmouseover="this.style.transform='scale(1.02)'" 
+                                     onmouseout="this.style.transform='scale(1)'"
+                                     alt="Foto bukti masalah">
+                                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 8px;">📷 Klik foto untuk memperbesar</div>
+                            </div>
+                        ` : `<div style="text-align: center; padding: 20px; background: var(--surface-secondary); border-radius: 12px; margin-bottom: 24px; color: var(--text-secondary);">📷 Tidak ada foto tersedia</div>`}
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                            <div style="background: var(--surface-secondary); padding: 16px; border-radius: 12px;">
+                                <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">👤 Pelapor</div>
+                                <div style="color: var(--text-secondary);">${report.nama}</div>
+                            </div>
+                            <div style="background: var(--surface-secondary); padding: 16px; border-radius: 12px;">
+                                <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">📧 Email</div>
+                                <div><a href="mailto:${report.email}" style="color: var(--primary-color);">${report.email}</a></div>
+                            </div>
+                            <div style="background: var(--surface-secondary); padding: 16px; border-radius: 12px;">
+                                <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">📱 Telepon</div>
+                                <div><a href="tel:${report.telepon}" style="color: var(--primary-color);">${report.telepon}</a></div>
+                            </div>
+                            <div style="background: var(--surface-secondary); padding: 16px; border-radius: 12px;">
+                                <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">📂 Kategori</div>
+                                <div style="color: var(--text-secondary);">${this.getCategoryDisplayName(report.kategori)}</div>
+                            </div>
+                            <div style="background: var(--surface-secondary); padding: 16px; border-radius: 12px;">
+                                <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">🏛️ Provinsi</div>
+                                <div style="color: var(--text-secondary);">${this.getProvinceDisplayName(report.provinsi)}</div>
+                            </div>
+                            <div style="background: var(--surface-secondary); padding: 16px; border-radius: 12px;">
+                                <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">📅 Tanggal</div>
+                                <div style="color: var(--text-secondary);">${new Date(report.tanggal).toLocaleDateString('id-ID')}</div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">⚡ Status & Prioritas</div>
+                            <div style="display: flex; gap: 8px;">
+                                <span class="priority-badge priority-${report.prioritas}">${report.prioritas}</span>
+                                <span class="status-badge status-${report.status}">${report.status}</span>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">📍 Lokasi</div>
+                            <div style="background: var(--surface-secondary); padding: 16px; border-radius: 12px; color: var(--text-secondary);">${report.lokasi}</div>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">🗺️ Koordinat</div>
+                            <div style="background: var(--surface-secondary); padding: 16px; border-radius: 12px; color: var(--text-secondary);">${report.lat.toFixed(6)}, ${report.lng.toFixed(6)}</div>
+                        </div>
+                        
+                        <div style="margin-bottom: 24px;">
+                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">📝 Deskripsi Lengkap</div>
+                            <div style="background: var(--surface-secondary); padding: 16px; border-radius: 12px; line-height: 1.6; color: var(--text-secondary);">${report.deskripsi}</div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                            <button onclick="app.showOnMap(${report.lat}, ${report.lng}); this.parentElement.parentElement.parentElement.remove(); document.body.style.overflow='auto'" style="background: var(--info-color); color: white; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='var(--info-color)'">
+                                🗺️ Lihat di Peta
+                            </button>
+                            ${report.foto ? `<button onclick="app.showPhotoModal('${report.foto}')" style="background: var(--success-color); color: white; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='var(--success-color)'">🖼️ Perbesar Foto</button>` : ''}
+                            ${this.currentUser ? `<button onclick="app.openStatusModal(${report.id}); this.parentElement.parentElement.parentElement.remove(); document.body.style.overflow='auto'" style="background: var(--warning-color); color: white; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='var(--warning-color)'">📊 Ubah Status</button>` : ''}
+                            <button onclick="this.parentElement.parentElement.parentElement.remove(); document.body.style.overflow='auto'" style="background: var(--primary-color); color: white; border: none; padding: 12px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;" onmouseover="this.style.background='var(--secondary-color)'" onmouseout="this.style.background='var(--primary-color)'">
+                                ✅ Tutup
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        overlay.remove();
+                        document.body.style.overflow = 'auto';
+                    }
+                });
+
+                document.body.appendChild(overlay);
+                document.body.style.overflow = 'hidden';
+            }
+
+            // Status modal
+            openStatusModal(reportId) {
+                if (!this.currentUser) {
+                    this.showNotification('Anda harus login untuk mengubah status!', 'error');
+                    return;
+                }
+
+                const report = this.reports.find(r => r.id === reportId);
+                if (!report) {
+                    this.showNotification('Laporan tidak ditemukan!', 'error');
+                    return;
+                }
+
+                if (!this.canAccessCategory(report.kategori)) {
+                    this.showNotification('Akses ditolak untuk laporan kategori ini!', 'error');
+                    return;
+                }
+
+                this.currentReportId = reportId;
+                document.getElementById('newStatus').value = report.status;
+                document.getElementById('statusNote').value = '';
+                document.getElementById('statusModal').classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+
+            // Update report status
+            updateReportStatus() {
+                const reportId = this.currentReportId;
+                const newStatus = document.getElementById('newStatus').value;
+                const statusNote = document.getElementById('statusNote').value.trim();
+
+                if (!newStatus) {
+                    this.showNotification('Pilih status baru!', 'error');
+                    return;
+                }
+
+                const reportIndex = this.reports.findIndex(r => r.id === reportId);
+                if (reportIndex === -1) {
+                    this.showNotification('Laporan tidak ditemukan!', 'error');
+                    return;
+                }
+
+                const report = this.reports[reportIndex];
+                const oldStatus = report.status;
+
+                report.status = newStatus;
+                
+                if (!report.statusHistory) {
+                    report.statusHistory = [];
+                }
+                
+                report.statusHistory.push({
+                    status: newStatus,
+                    tanggal: new Date().toISOString(),
+                    catatan: statusNote || `Status diubah dari ${oldStatus} ke ${newStatus}`,
+                    updatedBy: this.currentUser.username
+                });
+
+                if (this.saveReports()) {
+                    this.closeModal('statusModal');
+                    this.updateMapMarkers();
+                    this.updateDashboardStats();
+                    this.updateDashboardReports();
+                    this.showNotification(`Status laporan berhasil diubah ke "${newStatus}"!`, 'success');
+                } else {
+                    this.showNotification('Gagal menyimpan perubahan status!', 'error');
+                }
+            }
+
+            // Delete report
+            deleteReport(reportId) {
+                if (!this.currentUser) {
+                    this.showNotification('Anda harus login untuk menghapus laporan!', 'error');
+                    return;
+                }
+
+                const report = this.reports.find(r => r.id === reportId);
+                if (!report) {
+                    this.showNotification('Laporan tidak ditemukan!', 'error');
+                    return;
+                }
+
+                if (!this.canAccessCategory(report.kategori)) {
+                    this.showNotification('Akses ditolak! Anda tidak dapat menghapus laporan kategori ini.', 'error');
+                    return;
+                }
+
+                if (confirm(`Apakah Anda yakin ingin menghapus laporan "${report.judulMasalah}"?\n\nTindakan ini tidak dapat dibatalkan.`)) {
+                    this.reports = this.reports.filter(r => r.id !== reportId);
+                    
+                    if (this.saveReports()) {
+                        this.updateMapMarkers();
+                        this.updateDashboardStats();
+                        this.updateDashboardReports();
+                        this.showNotification('Laporan berhasil dihapus!', 'success');
+                    } else {
+                        this.showNotification('Gagal menghapus laporan!', 'error');
+                    }
+                }
+            }
+
+            // Show on map
+            showOnMap(lat, lng) {
+                this.switchTab('map');
+                setTimeout(() => {
+                    this.map.setView([lat, lng], 16);
+                    
+                    this.markers.forEach(marker => {
+                        const markerLat = marker.getLatLng().lat.toFixed(6);
+                        const markerLng = marker.getLatLng().lng.toFixed(6);
+                        if (markerLat == lat.toFixed(6) && markerLng == lng.toFixed(6)) {
+                            marker.openPopup();
+                        }
+                    });
+                }, 200);
+            }
+
+            // Photo modal
+            showPhotoModal(photoSrc) {
+                if (!photoSrc) {
+                    this.showNotification('Foto tidak tersedia!', 'error');
+                    return;
+                }
+                
+                document.getElementById('photoModalImg').src = photoSrc;
+                document.getElementById('photoModal').classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+
+            // Export to CSV
+            exportToCSV() {
+                if (!this.currentUser) {
+                    this.showNotification('Anda harus login untuk mengekspor data!', 'error');
+                    return;
+                }
+
+                const accessibleReports = this.getAccessibleReports();
+                const userAccount = this.userAccounts[this.currentUser.username];
+                
+                if (accessibleReports.length === 0) {
+                    this.showNotification('Tidak ada data untuk diekspor!', 'error');
+                    return;
+                }
+
+                const headers = [
+                    'ID', 'Nama', 'Email', 'Telepon', 'Judul Masalah', 'Kategori', 'Provinsi',
+                    'Deskripsi', 'Prioritas', 'Status', 'Lokasi', 'Tanggal Lapor', 'Waktu Lapor',
+                    'Latitude', 'Longitude', 'Ada Foto'
+                ];
+
+                const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + headers.join(',') + "\n"
+                    + accessibleReports.map(r => {
+                        const row = [
+                            r.id,
+                            `"${r.nama}"`,
+                            `"${r.email}"`,
+                            `"${r.telepon}"`,
+                            `"${r.judulMasalah.replace(/"/g, '""')}"`,
+                            `"${r.kategori}"`,
+                            `"${r.provinsi}"`,
+                            `"${r.deskripsi.replace(/"/g, '""')}"`,
+                            `"${r.prioritas}"`,
+                            `"${r.status}"`,
+                            `"${r.lokasi.replace(/"/g, '""')}"`,
+                            `"${r.tanggal}"`,
+                            `"${new Date(r.waktu).toLocaleString('id-ID')}"`,
+                            r.lat,
+                            r.lng,
+                            r.foto ? 'Ya' : 'Tidak'
+                        ];
+                        return row.join(',');
+                    }).join("\n");
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                
+                const categoryLabel = userAccount.categories.includes('all') ? 'semua_kategori' : userAccount.categories.join('_');
+                const timestamp = new Date().toISOString().split('T')[0];
+                
+                link.setAttribute("download", `peranti_laporan_${categoryLabel}_${timestamp}.csv`);
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                this.showNotification(`Data berhasil diekspor! (${accessibleReports.length} laporan)`, 'success');
+            }
+
+            // Clear data
+            handleClearData() {
+                if (!this.currentUser) {
+                    this.showNotification('Akses ditolak! Anda harus login terlebih dahulu.', 'error');
+                    return;
+                }
+                
+                const userAccount = this.userAccounts[this.currentUser.username];
+                if (!userAccount || !userAccount.categories.includes('all')) {
+                    this.showNotification('Akses ditolak! Hanya Super Admin yang dapat menghapus semua data.', 'error');
+                    return;
+                }
+
+                const confirmMessage = `PERINGATAN: Anda akan menghapus SEMUA DATA LAPORAN (${this.reports.length} laporan)!\n\nTindakan ini TIDAK DAPAT DIBATALKAN!\n\nKetik 'HAPUS SEMUA' untuk melanjutkan:`;
+                const userConfirmation = prompt(confirmMessage);
+                
+                if (userConfirmation === 'HAPUS SEMUA') {
+                    const totalReports = this.reports.length;
+                    this.reports = [];
+                    this.reportIdCounter = 1;
+                    
+                    if (this.saveReports()) {
+                        this.updateMapMarkers();
+                        this.updateDashboardStats();
+                        this.updateDashboardReports();
+                        this.showNotification(`Semua data berhasil dihapus! (${totalReports} laporan)`, 'success');
+                    } else {
+                        this.showNotification('Gagal menghapus data!', 'error');
+                    }
+                } else {
+                    this.showNotification('Penghapusan data dibatalkan.', 'info');
+                }
+            }
+
+            // Refresh map
+            refreshMap() {
+                const btn = document.getElementById('refreshMapBtn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<span class="loading-spinner"></span> Memuat...';
+                btn.disabled = true;
+
+                setTimeout(() => {
+                    this.updateMapMarkers();
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    this.showNotification('Peta berhasil di-refresh!', 'success');
+                }, 1000);
+            }
+
+            // Refresh dashboard
+            refreshDashboard() {
+                const btn = document.getElementById('refreshDashboardBtn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<span class="loading-spinner"></span>';
+                btn.disabled = true;
+
+                setTimeout(() => {
+                    this.updateDashboard();
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    this.showNotification('Dashboard berhasil di-refresh!', 'success');
+                }, 800);
+            }
+
+            // Helper functions
+            getCategoryDisplayName(category) {
+                const categoryNames = {
+                    'infrastruktur': 'Infrastruktur',
+                    'kebakaran': 'Kebakaran',
+                    'keamanan': 'Keamanan',
+                    'bencana alam': 'Bencana Alam',
+                    'transportasi': 'Transportasi',
+                    'kebersihan': 'Kebersihan',
+                    'lainnya': 'Lainnya'
+                };
+                return categoryNames[category] || category;
+            }
+
+            getProvinceDisplayName(province) {
+                return province.charAt(0).toUpperCase() + province.slice(1);
+            }
+
+            // Enhanced notification system
+            showNotification(message, type = 'info', duration = 4000) {
+                document.querySelectorAll('.notification').forEach(n => n.remove());
+
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                
+                const icons = {
+                    'success': '✅',
+                    'error': '❌',
+                    'info': 'ℹ️',
+                    'warning': '⚠️'
+                };
+                
+                notification.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 1.2rem;">${icons[type] || 'ℹ️'}</span>
+                        <span>${message}</span>
+                        <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: inherit; cursor: pointer; font-size: 1.5rem; opacity: 0.8; margin-left: auto;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">×</button>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateX(100%)';
+                    setTimeout(() => notification.remove(), 300);
+                }, duration);
+
+                notification.addEventListener('click', () => {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateX(100%)';
+                    setTimeout(() => notification.remove(), 300);
+                });
+            }
+
+            // Cleanup
+            cleanup() {
+                this.saveReports();
+                this.saveCurrentUser();
+                
+                if (this.debounceTimer) {
+                    clearTimeout(this.debounceTimer);
+                }
+            }
+        }
+
+        // Initialize application
+        let app;
+        try {
+            app = new PERANTI();
+            
+            // Setup cleanup
+            window.addEventListener('beforeunload', () => {
+                if (app) app.cleanup();
+            });
+            
+            // Handle orientation change
+            window.addEventListener('orientationchange', () => {
+                if (app && app.map) {
+                    setTimeout(() => {
+                        app.map.invalidateSize();
+                    }, 500);
+                }
+            });
+
+            // Handle visibility change
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden && app && app.map) {
+                    setTimeout(() => {
+                        app.map.invalidateSize();
+                    }, 100);
+                }
+            });
+
+            // Global error handler
+            window.addEventListener('error', (event) => {
+                console.error('Global error:', event.error);
+                if (app) {
+                    app.showNotification('Terjadi kesalahan sistem. Silakan refresh halaman jika masalah berlanjut.', 'error', 8000);
+                }
+            });
+
+            // Network status handlers
+            window.addEventListener('online', () => {
+                if (app) {
+                    app.showNotification('Koneksi internet tersedia kembali.', 'success');
+                }
+            });
+
+            window.addEventListener('offline', () => {
+                if (app) {
+                    app.showNotification('Koneksi internet terputus. Data akan tersimpan secara lokal.', 'warning', 6000);
+                }
+            });
+
+        } catch (error) {
+            console.error('Failed to initialize PERANTI:', error);
+            document.body.innerHTML = `
+                <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; background: var(--surface-secondary);">
+                    <div style="background: var(--surface-primary); padding: 40px; border-radius: 20px; box-shadow: var(--shadow-xl); text-align: center; max-width: 600px; border: 1px solid var(--border-color);">
+                        <div style="font-size: 4rem; margin-bottom: 20px;">⚠️</div>
+                        <h2 style="color: var(--danger-color); margin-bottom: 16px; font-size: 1.5rem; font-weight: 700;">Gagal Memuat Aplikasi</h2>
+                        <p style="color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6;">PERANTI gagal dimuat. Silakan refresh halaman atau hubungi administrator jika masalah berlanjut.</p>
+                        <button onclick="location.reload()" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; padding: 12px 24px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                            🔄 Refresh Halaman
+                        </button>
+                        <div style="margin-top: 24px; padding: 16px; background: var(--surface-secondary); border-radius: 12px; font-size: 0.85rem; color: var(--text-secondary); text-align: left;">
+                            <strong>Error Details:</strong><br>
+                            ${error.message || 'Unknown error occurred'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const maskot = document.getElementById('maskotPeranti');
+  const bubble = document.getElementById('maskotBubble');
+  const popSound = document.getElementById('popSound');
+  const burstSound = document.getElementById('burstSound');
+  const sparkSound = document.getElementById('sparkSound');
+  const maskotNormal = document.getElementById('maskotNormal');
+  const maskotShocked = document.getElementById('maskotShocked');
+  const particlesContainer = document.getElementById('burstParticles');
+  const flashEffect = document.getElementById('flashEffect');
+  const auraRing = document.getElementById('auraRing');
+
+  const messages = [
+    "Halo! Yuk, laporkan infrastruktur di sekitarmu 🏗️",
+    "Klik 📍 untuk melihat lokasi kamu sekarang!",
+    "Terima kasih sudah peduli lingkungan 💚",
+    "PERANTI hadir untuk rakyat Indonesia 🇮🇩",
+    "Hebat! Kamu ikut membangun negeri 💪",
+    "Jangan lupa isi laporan dengan lengkap ya ✍️"
+  ];
+
+  let bubbleVisible = false;
+
+  // 🌈 Partikel bercahaya mewah
+  function createParticles() {
+    for (let i = 0; i < 45; i++) {
+      const particle = document.createElement('div');
+      particle.classList.add('particle');
+      const angle = Math.random() * 360 * (Math.PI / 180);
+      const distance = 60 + Math.random() * 80;
+      particle.style.setProperty('--x', Math.cos(angle) * distance);
+      particle.style.setProperty('--y', Math.sin(angle) * distance);
+
+      const colors = ['#fff2b3', '#b3e6ff', '#e6b3ff', '#ffd480', '#ccf2ff'];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      particle.style.background = `radial-gradient(circle, ${color}, transparent)`;
+      particle.style.boxShadow = `0 0 12px ${color}`;
+      particle.style.width = `${6 + Math.random() * 6}px`;
+      particle.style.height = particle.style.width;
+      particlesContainer.appendChild(particle);
+      setTimeout(() => particle.remove(), 2000);
+    }
+  }
+
+  function triggerAura() {
+    auraRing.classList.add('active');
+    setTimeout(() => auraRing.classList.remove('active'), 1200);
+  }
+
+  function triggerFlash() {
+    flashEffect.classList.add('active');
+    sparkSound.currentTime = 0;
+    sparkSound.play().catch(()=>{});
+    setTimeout(() => flashEffect.classList.remove('active'), 1000);
+  }
+
+  // 💥 Klik maskot
+  maskot.addEventListener('click', () => {
+    if (bubbleVisible) {
+      burstSound.currentTime = 0;
+      burstSound.play().catch(()=>{});
+      createParticles();
+      triggerAura();
+      triggerFlash();
+
+      maskotNormal.classList.add('hidden');
+      maskotShocked.classList.remove('hidden');
+      maskot.classList.add('shake');
+
+      bubble.classList.add('pop');
+      setTimeout(() => {
+        bubble.classList.remove('show','pop');
+        bubbleVisible = false;
+        maskot.classList.remove('shake');
+
+        // 😲 ekspresi kaget bertahan 2,5 detik
+        setTimeout(() => {
+          maskotNormal.classList.remove('hidden');
+          maskotShocked.classList.add('hidden');
+        }, 2500);
+      }, 800);
+      return;
+    }
+
+    // 💬 Tampilkan gelembung baru
+    const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+    bubble.textContent = randomMsg;
+    popSound.currentTime = 0;
+    popSound.play().catch(()=>{});
+    bubble.classList.add('show');
+    bubbleVisible = true;
+
+    // hilang otomatis 3 detik
+    setTimeout(() => {
+      if (bubbleVisible) {
+        bubble.classList.remove('show');
+        bubbleVisible = false;
+      }
+    }, 3000);
+  });
+});
+</script>
+</body>
+</html>
